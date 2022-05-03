@@ -1,0 +1,4 @@
+administer word counter:
+  title: 'Administer Word counter'
+  description: 'Enables to count the number of words.'
+  restrict access: TRUE

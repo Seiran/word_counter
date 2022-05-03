@@ -1,0 +1,4 @@
+word_counter.settings:
+  route_name: word_counter.settings
+  title: Settings
+  base_route: word_counter.settings 

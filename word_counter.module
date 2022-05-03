@@ -1,0 +1,47 @@
+<?php
+
+/**
+ * @file
+ * Contains word_counter.module.
+ */
+
+use Drupal\node\NodeInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function word_counter_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if ($form_id == 'node_article_edit_form' || $form_id == 'node_article_form') {
+    $form['field_word_counter']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function word_counter_node_view(array &$build, NodeInterface $node, EntityViewDisplayInterface $display, $view_mode) {
+  if (isset($build['field_word_counter'])) {
+    $config = \Drupal::config('word_counter.settings');
+    if (!$config->get('enable_word_count')) {
+      unset($build['field_word_counter']);
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ */
+function word_counter_node_presave(Drupal\node\NodeInterface $node) {
+  if ($node->getType() == 'article') {
+    $config = \Drupal::config('word_counter.settings');
+
+    if ($config->get('enable_word_count')) {
+      $string = strip_tags(preg_replace(['@<(script|style)[^>]*?>.*?</\\1>@si', '/[^A-Za-z\s]+/'], '', $node->body->value), ENT_QUOTES);
+      $count = preg_match_all("/[\w']+/", $string); 
+      $node->set('field_word_counter', $count);
+    }
+  }
+}
